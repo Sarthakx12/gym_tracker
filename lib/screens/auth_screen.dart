@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/supabase_service.dart';
@@ -93,12 +94,14 @@ class _AuthScreenState extends State<AuthScreen>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final bottomPad = MediaQuery.of(context).viewInsets.bottom;
+    final size        = MediaQuery.of(context).size;
+    final keyboardPad = MediaQuery.of(context).viewInsets.bottom;
+    final navBarPad   = MediaQuery.of(context).viewPadding.bottom;
 
     return Scaffold(
       backgroundColor: Colors.black,
       resizeToAvoidBottomInset: false,
+      extendBody: true,
       body: Stack(
         children: [
           // ── Background image ────────────────────────────────────
@@ -138,6 +141,7 @@ class _AuthScreenState extends State<AuthScreen>
 
           // ── Content ─────────────────────────────────────────────
           SafeArea(
+            bottom: false,
             child: AnimatedBuilder(
               animation: _entryCtrl,
               builder: (_, child) => Opacity(
@@ -216,7 +220,7 @@ class _AuthScreenState extends State<AuthScreen>
                   AnimatedPadding(
                     duration: const Duration(milliseconds: 280),
                     curve: Curves.easeOutCubic,
-                    padding: EdgeInsets.only(bottom: bottomPad),
+                    padding: EdgeInsets.only(bottom: keyboardPad),
                     child: Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
@@ -229,7 +233,7 @@ class _AuthScreenState extends State<AuthScreen>
                           width: 0.5,
                         ),
                       ),
-                      padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
+                      padding: EdgeInsets.fromLTRB(24, 12, 24, 28 + navBarPad),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -387,24 +391,63 @@ class _GoogleSignInButton extends StatelessWidget {
 class _GoogleGlyph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 22, height: 22,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.black12, width: 1),
-      ),
-      child: const Center(
-        child: Text(
-          'G',
-          style: TextStyle(
-            color: Color(0xFF4285F4),
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ),
+    return SizedBox(
+      width: 20,
+      height: 20,
+      child: CustomPaint(painter: _GoogleGPainter()),
     );
   }
+}
+
+class _GoogleGPainter extends CustomPainter {
+  static const _blue   = Color(0xFF4285F4);
+  static const _red    = Color(0xFFEA4335);
+  static const _yellow = Color(0xFFFBBC05);
+  static const _green  = Color(0xFF34A853);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final sw     = size.width * 0.22;
+    final radius = (size.width - sw) / 2;
+    final center = Offset(size.width / 2, size.height / 2);
+    final rect   = Rect.fromCircle(center: center, radius: radius);
+
+    final paint = Paint()
+      ..style    = PaintingStyle.stroke
+      ..strokeWidth = sw
+      ..strokeCap   = StrokeCap.butt;
+
+    // Angles clockwise from 3 o'clock. G opening is on the right (~310°→10°).
+    // Green  10° →  55°  (45°)
+    paint.color = _green;
+    canvas.drawArc(rect, 10 * pi / 180, 45 * pi / 180, false, paint);
+
+    // Yellow  55° → 115°  (60°)
+    paint.color = _yellow;
+    canvas.drawArc(rect, 55 * pi / 180, 60 * pi / 180, false, paint);
+
+    // Red  115° → 175°  (60°)
+    paint.color = _red;
+    canvas.drawArc(rect, 115 * pi / 180, 60 * pi / 180, false, paint);
+
+    // Blue  175° → 310°  (135°) — the long arc through 9 and 12 o'clock
+    paint.color = _blue;
+    canvas.drawArc(rect, 175 * pi / 180, 135 * pi / 180, false, paint);
+
+    // Horizontal bar (blue) — from center to right edge at mid-height
+    canvas.drawRect(
+      Rect.fromLTRB(
+        center.dx,
+        center.dy - sw / 2,
+        size.width - sw * 0.3,
+        center.dy + sw / 2,
+      ),
+      Paint()..color = _blue,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_GoogleGPainter old) => false;
 }
 
 class _OutlineButton extends StatelessWidget {
