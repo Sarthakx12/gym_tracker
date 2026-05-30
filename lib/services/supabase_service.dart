@@ -1,4 +1,6 @@
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../config/app_config.dart';
 import '../models/workout_session.dart';
 import '../models/exercise_log.dart';
 
@@ -20,6 +22,28 @@ class SupabaseService {
 
   static Future<AuthResponse> signIn(String email, String password) =>
       client.auth.signInWithPassword(email: email, password: password);
+
+  static Future<void> signInWithGoogle() async {
+    final googleSignIn = GoogleSignIn(
+      serverClientId: AppConfig.googleWebClientId,
+      scopes: ['email', 'profile'],
+    );
+
+    final googleUser = await googleSignIn.signIn();
+    if (googleUser == null) throw Exception('Google sign-in cancelled');
+
+    final googleAuth = await googleUser.authentication;
+    final idToken    = googleAuth.idToken;
+    final accessToken = googleAuth.accessToken;
+
+    if (idToken == null) throw Exception('No ID token received from Google');
+
+    await client.auth.signInWithIdToken(
+      provider: OAuthProvider.google,
+      idToken: idToken,
+      accessToken: accessToken,
+    );
+  }
 
   static Future<void> signOut() => client.auth.signOut();
 

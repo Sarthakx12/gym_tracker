@@ -71,9 +71,6 @@ class _AuthGateState extends State<_AuthGate> {
   @override
   Widget build(BuildContext context) {
     final session = Supabase.instance.client.auth.currentSession;
-    if (session != null) {
-      return const HomeScreen();
-    }
-    return const HomeScreen();
+    return session != null ? const HomeScreen() : const AuthScreen();
   }
 }
