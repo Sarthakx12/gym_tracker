@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/supabase_service.dart';
@@ -15,7 +14,6 @@ class _AuthScreenState extends State<AuthScreen>
   final _emailCtrl    = TextEditingController();
   final _passwordCtrl = TextEditingController();
 
-  late final AnimationController _bgCtrl;
   late final AnimationController _entryCtrl;
   late final Animation<double>   _entrySlide;
   late final Animation<double>   _entryFade;
@@ -30,11 +28,6 @@ class _AuthScreenState extends State<AuthScreen>
   @override
   void initState() {
     super.initState();
-
-    _bgCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 7),
-    )..repeat(reverse: true);
 
     _entryCtrl = AnimationController(
       vsync: this,
@@ -56,7 +49,6 @@ class _AuthScreenState extends State<AuthScreen>
 
   @override
   void dispose() {
-    _bgCtrl.dispose();
     _entryCtrl.dispose();
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
@@ -109,19 +101,32 @@ class _AuthScreenState extends State<AuthScreen>
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
-          // ── Animated cinematic background ──────────────────────
-          AnimatedBuilder(
-            animation: _bgCtrl,
-            builder: (_, child) {
-              final t = _bgCtrl.value;
-              return SizedBox(
-                width: size.width,
-                height: size.height,
-                child: CustomPaint(
-                  painter: _CinematicBgPainter(t),
+          // ── Background image ────────────────────────────────────
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/auth_bg.jpg',
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+            ),
+          ),
+
+          // ── Cinematic dark overlay (bottom-heavy for text) ──────
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.55),
+                    Colors.black.withValues(alpha: 0.40),
+                    Colors.black.withValues(alpha: 0.75),
+                    Colors.black.withValues(alpha: 0.97),
+                  ],
+                  stops: const [0.0, 0.35, 0.65, 1.0],
                 ),
-              );
-            },
+              ),
+            ),
           ),
 
           // ── Decorative grid lines ───────────────────────────────
@@ -630,51 +635,6 @@ class _AuthTextField extends StatelessWidget {
 }
 
 // ── Painters ─────────────────────────────────────────────────────────────────
-
-class _CinematicBgPainter extends CustomPainter {
-  final double t;
-  _CinematicBgPainter(this.t);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Deep gradient base
-    final bgPaint = Paint()
-      ..shader = RadialGradient(
-        center: Alignment(
-          -0.4 + 0.5 * sin(t * pi),
-          -0.7 + 0.25 * cos(t * pi),
-        ),
-        radius: 1.5,
-        colors: const [
-          Color(0xFF1E1E1E),
-          Color(0xFF0B0B0B),
-          Color(0xFF000000),
-        ],
-        stops: const [0.0, 0.45, 1.0],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), bgPaint);
-
-    // Subtle warm highlight (gym light feel)
-    final spotPaint = Paint()
-      ..shader = RadialGradient(
-        center: Alignment(
-          0.6 + 0.2 * cos(t * pi * 1.3),
-          -0.9,
-        ),
-        radius: 0.8,
-        colors: [
-          const Color(0xFFFFFFFF).withValues(alpha: 0.04 + 0.02 * sin(t * pi)),
-          Colors.transparent,
-        ],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), spotPaint);
-  }
-
-  @override
-  bool shouldRepaint(_CinematicBgPainter old) => old.t != t;
-}
 
 class _GridPainter extends CustomPainter {
   @override
