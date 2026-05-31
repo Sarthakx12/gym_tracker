@@ -12,7 +12,7 @@ import '../widgets/pressable.dart';
 import 'active_workout_screen.dart';
 import 'session_detail_screen.dart';
 import 'charts_screen.dart';
-import 'watch_screen.dart';
+import 'plans_screen.dart';
 import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _DashboardTab(),
           _LogsTab(),
           ChartsScreen(),
-          WatchScreen(),
+          PlansScreen(),
           ProfileScreen(),
         ],
       ),
@@ -69,11 +69,11 @@ class _GlassTabBar extends StatelessWidget {
     Icons.grid_view_rounded,
     Icons.calendar_month_rounded,
     Icons.bar_chart_rounded,
-    Icons.watch_rounded,
+    Icons.menu_book_rounded,
     Icons.person_rounded,
   ];
 
-  static const _labels = ['Home', 'History', 'Progress', 'Watch', 'Profile'];
+  static const _labels = ['Home', 'History', 'Progress', 'Plans', 'Profile'];
 
   @override
   Widget build(BuildContext context) {

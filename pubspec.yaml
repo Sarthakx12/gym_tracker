@@ -22,6 +22,8 @@ dependencies:
   supabase_flutter: ^2.8.4
   connectivity_plus: ^6.1.4
   google_sign_in: ^6.2.2
+  http: ^1.2.2
+  shared_preferences: ^2.3.3
 
 dev_dependencies:
   flutter_test:
@@ -42,3 +44,4 @@ flutter:
   assets:
     - assets/icon/
     - assets/images/
+    - assets/video/
